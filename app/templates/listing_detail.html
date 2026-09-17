@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}{{ listing.title }} - Airbnb Clone{% endblock %}
+{% block content %}
+  <h1>{{ listing.title }}</h1>
+  <p class="location">{{ listing.city }}</p>
+  <p>${{ "%.2f"|format(listing.price_per_night) }} / night &middot; up to {{ listing.max_guests }} guests</p>
+  <p>{{ listing.description }}</p>
+
+  {% if avg_rating is not none %}
+    <p class="rating">★ {{ avg_rating }} average rating ({{ reviews|length }} review{{ 's' if reviews|length != 1 else '' }})</p>
+  {% else %}
+    <p class="rating">No reviews yet</p>
+  {% endif %}
+
+  <section>
+    <h2>Book this listing</h2>
+    <form class="stacked-form" method="post" action="{{ url_for('main.book_listing', listing_id=listing.id) }}">
+      <label>Your name
+        <input type="text" name="guest_name" required>
+      </label>
+      <label>Check-in
+        <input type="date" name="check_in" required>
+      </label>
+      <label>Check-out
+        <input type="date" name="check_out" required>
+      </label>
+      <button type="submit">Book</button>
+    </form>
+  </section>
+
+  <section>
+    <h2>Upcoming bookings</h2>
+    {% if bookings %}
+      <ul class="booking-list">
+        {% for booking in bookings %}
+          <li>
+            {{ booking.check_in }} &rarr; {{ booking.check_out }}
+            ({{ booking.guest_name }}, {{ booking.status }}, ${{ "%.2f"|format(booking.total_price) }})
+            {% if booking.status != 'cancelled' %}
+              <form class="inline-form" method="post" action="{{ url_for('main.cancel_booking', booking_id=booking.id) }}">
+                <button type="submit">Cancel</button>
+              </form>
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>No bookings yet - this listing is wide open.</p>
+    {% endif %}
+  </section>
+
+  <section>
+    <h2>Leave a review</h2>
+    <form class="stacked-form" method="post" action="{{ url_for('main.add_review', listing_id=listing.id) }}">
+      <label>Your name
+        <input type="text" name="guest_name" required>
+      </label>
+      <label>Rating (1-5)
+        <input type="number" name="rating" min="1" max="5" required>
+      </label>
+      <label>Comment
+        <textarea name="comment"></textarea>
+      </label>
+      <button type="submit">Submit review</button>
+    </form>
+
+    {% if reviews %}
+      <ul class="review-list">
+        {% for review in reviews %}
+          <li><strong>{{ review.guest_name }}</strong> - {{ review.rating }}/5<br>{{ review.comment }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  </section>
+{% endblock %}

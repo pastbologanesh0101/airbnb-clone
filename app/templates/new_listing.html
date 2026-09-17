@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Host a Listing - Airbnb Clone{% endblock %}
+{% block content %}
+  <h1>Host a new listing</h1>
+  <form class="stacked-form" method="post" action="{{ url_for('main.new_listing') }}">
+    <label>Host name
+      <input type="text" name="host_name" value="{{ form.host_name or '' }}" required>
+    </label>
+    <label>Title
+      <input type="text" name="title" value="{{ form.title or '' }}" required>
+    </label>
+    <label>Description
+      <textarea name="description">{{ form.description or '' }}</textarea>
+    </label>
+    <label>City
+      <input type="text" name="city" value="{{ form.city or '' }}" required>
+    </label>
+    <label>Price per night ($)
+      <input type="number" step="0.01" name="price_per_night" value="{{ form.price_per_night or '' }}" required>
+    </label>
+    <label>Max guests
+      <input type="number" name="max_guests" value="{{ form.max_guests or '' }}" required>
+    </label>
+    <button type="submit">Create listing</button>
+  </form>
+{% endblock %}
