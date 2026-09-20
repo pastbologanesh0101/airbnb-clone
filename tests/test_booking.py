@@ -119,6 +119,36 @@ def test_booking_adjacent_dates_succeed(app, client):
     assert len(get_bookings(app, listing_id)) == 2
 
 
+def test_is_available_excludes_given_booking_id(app, client):
+    """The exclude_booking_id parameter lets a booking's own dates be
+    treated as free -- this is what an "edit this booking" flow would use
+    to check availability without conflicting with itself. Nothing in the
+    HTTP-level tests exercises this parameter directly."""
+    from app.booking_logic import is_available
+
+    listing_id = make_host_and_listing(app)
+    book(client, listing_id, "Alice", "2026-06-01", "2026-06-05")
+
+    with app.app_context():
+        db = get_db()
+        booking_id = db.execute(
+            "SELECT id FROM booking WHERE listing_id = ?", (listing_id,)
+        ).fetchone()["id"]
+
+        # Without excluding it, the booking's own dates are unavailable.
+        assert not is_available(db, listing_id, "2026-06-01", "2026-06-05")
+        # Excluding the booking's own id treats its dates as free again.
+        assert is_available(
+            db, listing_id, "2026-06-01", "2026-06-05",
+            exclude_booking_id=booking_id,
+        )
+
+
+def test_booking_nonexistent_listing_returns_not_found(app, client):
+    resp = book(client, 9999, "Alice", "2026-03-01", "2026-03-05")
+    assert resp.status_code == 404
+
+
 def test_checkout_before_or_equal_checkin_rejected(app, client):
     listing_id = make_host_and_listing(app)
 
