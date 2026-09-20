@@ -89,6 +89,25 @@ data.
 6. Leave a review (1-5 stars + comment); the listing's average rating
    updates immediately.
 
+## Troubleshooting / FAQ
+
+**"Check-in and check-out must be valid dates in YYYY-MM-DD format."** —
+the booking form's date inputs are plain text passed straight to
+`datetime.strptime(value, "%Y-%m-%d")`. Make sure you're submitting
+zero-padded ISO dates (`2026-03-01`, not `3/1/26` or `2026-3-1`).
+
+**Why is my booking rejected even though the dates don't visually
+overlap?** Remember bookings are half-open `[check_in, check_out)` — a
+stay from `2026-03-01` to `2026-03-05` occupies the nights of the 1st
+through the 4th. Only a *new* check-in on or after `2026-03-05` is free;
+anything from `2026-03-01` through `2026-03-04` still conflicts.
+
+**The app fails to start / can't find the database.** `run.py` creates
+`instance/airbnb.db` automatically on first run via `create_app()`'s
+`os.makedirs(app.instance_path, exist_ok=True)`. If you deleted the
+`instance/` folder while the app was running, restart the dev server so it
+gets recreated.
+
 ## CI
 
 `.github/workflows/tests.yml` runs the full test suite on every push and
