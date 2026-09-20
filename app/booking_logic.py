@@ -69,8 +69,16 @@ class BookingError(ValueError):
 
 
 def create_booking(db, listing_id, guest_name, check_in, check_out):
-    check_in_d = parse_date(check_in)
-    check_out_d = parse_date(check_out)
+    if not guest_name or not guest_name.strip():
+        raise BookingError("Guest name is required.")
+
+    try:
+        check_in_d = parse_date(check_in)
+        check_out_d = parse_date(check_out)
+    except (ValueError, TypeError):
+        raise BookingError(
+            "Check-in and check-out must be valid dates in YYYY-MM-DD format."
+        )
 
     if check_out_d <= check_in_d:
         raise BookingError("Check-out date must be after check-in date.")

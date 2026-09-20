@@ -149,6 +149,14 @@ def test_booking_nonexistent_listing_returns_not_found(app, client):
     assert resp.status_code == 404
 
 
+def test_booking_with_malformed_date_shows_friendly_error_not_500(app, client):
+    listing_id = make_host_and_listing(app)
+    resp = book(client, listing_id, "Alice", "not-a-date", "2026-03-05")
+    assert resp.status_code == 200
+    assert b"valid dates" in resp.data
+    assert len(get_bookings(app, listing_id)) == 0
+
+
 def test_checkout_before_or_equal_checkin_rejected(app, client):
     listing_id = make_host_and_listing(app)
 
